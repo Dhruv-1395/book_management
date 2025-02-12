@@ -1,5 +1,5 @@
 import { User } from "../model/user.model.js";
-import { errorResponse,successResponse } from "../utils/apiResponse.js";
+import { errorResponse,successResponse,successResponseWithData } from "../utils/apiResponse.js";
 
 export const userRegistration = async (req, res) => {
     try {
@@ -24,8 +24,23 @@ export const userRegistration = async (req, res) => {
             phone
         })
        
-        return successResponse(res,"otp send,check your email.");
+        return successResponse(res,"user created.");
 
+
+    } catch (error) {
+        return errorResponse(res, error.message);
+    }
+}
+
+export const getAllUsers = async (_, res) => {
+    try {
+
+        const data = await User.find();
+        if (!data) {
+            return notFoundResponse(res, 'no data avialable');
+        }
+
+        return successResponseWithData(res, 'data found', data);
 
     } catch (error) {
         return errorResponse(res, error.message);
