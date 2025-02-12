@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
 import  jwt from "jsonwebtoken";
+import toJSON from "./model.plugin.js";
 
 const UserSchema = mongoose.Schema({
     username:{
@@ -52,5 +53,7 @@ UserSchema.methods.genrateAccessToken = async function(){
     )
     return token;
 }
+
+UserSchema.plugin(toJSON);
 
 export const User = mongoose.model("users",UserSchema);

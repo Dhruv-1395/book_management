@@ -35,7 +35,7 @@ export const userRegistration = async (req, res) => {
 export const getAllUsers = async (_, res) => {
     try {
 
-        const data = await User.find();
+        const data = await User.find().select('-password');
         if (!data) {
             return notFoundResponse(res, 'no data avialable');
         }
