@@ -1,5 +1,9 @@
+import { config } from "../config/config.js";
+import sendMail from "../mail/sendMail.js";
+import { Token } from "../model/token.model.js";
 import { User } from "../model/user.model.js";
-import { errorResponse,successResponse,successResponseWithData } from "../utils/apiResponse.js";
+import { errorResponse,successResponse,successResponseWithData,notFoundResponse, validationError } from "../utils/apiResponse.js";
+import genrateVerifyToken from "../utils/verifyToken.js";
 
 export const userRegistration = async (req, res) => {
     try {
@@ -17,14 +21,21 @@ export const userRegistration = async (req, res) => {
             return errorResponse(res, 'User already exist!');
         }
 
-        await User.create({
+       const newUser = await User.create({
             username,
             email,
             password,
             phone
         })
-       
-        return successResponse(res,"user created.");
+
+        const token = genrateVerifyToken();
+        await Token.create({
+            userId:newUser.id,
+            token
+        })
+         let verifylink = `${config.api_url}/api/auth/verify?token=${token}`
+         await sendMail(email,verifylink);
+        return successResponse(res,`User registered successfully, Verification mail send to ${email}`);
 
 
     } catch (error) {
@@ -32,11 +43,55 @@ export const userRegistration = async (req, res) => {
     }
 }
 
+
+export const loginUser = async (req,res) =>{
+    try {
+        const { email, password } = req.body;
+  
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+          return notFoundResponse(res, 'User Not Found');
+        }
+        // Check if the password is correct
+        const isPasswordValid = user.verifyPassword(password);
+        if (!isPasswordValid) {
+          return validationError(res, 'Invalid Password');
+        }
+        if (!user.isVarify) {
+          const verifytoken = genrateVerifyToken();
+          await Token.create({
+            userId: user._id,
+            token: verifytoken
+          })
+          let verifylink = `${process.env.API_URL}/api/auth/verify?token=${verifytoken}`
+          await sendMail(email,verifylink)
+          return validationError(res, 'Please Verify Your Account!,Verification Mail Send To Your Email');
+        }
+  
+        // Generate a JWT token
+        const token = await user.genrateAccessToken();
+  
+        // Return user data, token, and expiration time in the response
+        const options = {
+            httpOnly: true,
+            secure:true
+        }
+
+        return res
+        .status(200)
+        .cookie('accessToken',token,options)
+        .json({message:"Login successfull.",token});;
+      } catch (error) {
+        return errorResponse(res, error.message);
+      }
+}
+
 export const getAllUsers = async (_, res) => {
     try {
 
         const data = await User.find().select('-password');
-        if (!data) {
+        if (data.length === 0) {
             return notFoundResponse(res, 'no data avialable');
         }
 

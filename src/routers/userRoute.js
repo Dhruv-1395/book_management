@@ -1,11 +1,14 @@
 import express from 'express'
-import { userRegistration,getAllUsers } from '../controller/user.controller.js';
+import { userRegistration,getAllUsers, loginUser } from '../controller/user.controller.js';
+import { validateLoginUser, validateUser } from '../utils/validation.js';
+import { adminAuthenticate } from '../middleware/authentication.js';
 
 const router = express.Router();
 
-router.get('/get-users',getAllUsers);
-router.post('/register',userRegistration)
-//hello
+router.get('/get-users',adminAuthenticate,getAllUsers);
+router.post('/register',validateUser,userRegistration);
+router.post('/login',validateLoginUser,loginUser)
+
 
 
 export default router;

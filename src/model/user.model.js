@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
 import  jwt from "jsonwebtoken";
 import toJSON from "./model.plugin.js";
+import { config } from "../config/config.js";
 
 const UserSchema = mongoose.Schema({
     username:{
@@ -26,6 +27,10 @@ const UserSchema = mongoose.Schema({
     isAdmin:{
         type:Boolean,
         default:false
+    },
+    isVarify:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true});
 
@@ -45,11 +50,11 @@ UserSchema.methods.verifyPassword = async function(password){
 UserSchema.methods.genrateAccessToken = async function(){
     const token = await jwt.sign(
         {
-            _id:this._id,
+            id:this._id,
             isAdmin:this.isAdmin
         },
-        process.env.ACCESS_TOKEN_SECRET,
-        {expiresIn:process.env.ACCESS_TOKEN_EXPIRED}
+        config.jwtSecret,
+        {expiresIn:config.jwtExpiresIn}
     )
     return token;
 }
