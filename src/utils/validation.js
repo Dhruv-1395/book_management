@@ -20,11 +20,6 @@ export const validateUser = [
             minNumbers:3
         }).withMessage('Password must have minimum 8 characters,1 uppercase,1 special symbol,at least 3 digits'),
 
-    check('phone')
-        .notEmpty().withMessage('Phone number is required')
-        .isMobilePhone().withMessage('Invalid phone number'),
-
-
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

@@ -16,8 +16,17 @@ export const verifyUser = async (req,res) =>{
         user.isVarify = true
         await user.save();
         await Token.findByIdAndDelete(checktoken._id);
+        const Jwttoken = await user.genrateAccessToken();
+  
+        // Return user data, token, and expiration time in the response
+        const options = {
+            httpOnly: true,
+            secure:true
+        }
         const redirectUrl = config.app_url;
-        return res.redirect(redirectUrl);
+        return res
+        .cookie('accessToken',Jwttoken,options)
+        .redirect(redirectUrl);
       } catch (error) {
         return errorResponse(res, error.message);
       }

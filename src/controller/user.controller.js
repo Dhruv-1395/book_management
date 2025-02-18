@@ -7,10 +7,10 @@ import genrateVerifyToken from "../utils/verifyToken.js";
 
 export const userRegistration = async (req, res) => {
     try {
-        const { username, email, password, phone } = req.body
+        const { username, email, password } = req.body
 
         if (
-            [username, email, password, phone].some((feild) => feild.trim() === "")
+            [username, email, password].some((feild) => feild.trim() === "")
         ) {
             return errorResponse(res, 'All feilds are required!');
         }
@@ -18,14 +18,13 @@ export const userRegistration = async (req, res) => {
         const isExist = await User.findOne({ email });
 
         if (isExist) {
-            return errorResponse(res, 'User already exist!');
+            return validationError(res, 'User already exist!');
         }
 
        const newUser = await User.create({
             username,
             email,
             password,
-            phone
         })
 
         const token = genrateVerifyToken();
@@ -54,7 +53,7 @@ export const loginUser = async (req,res) =>{
           return notFoundResponse(res, 'User Not Found');
         }
         // Check if the password is correct
-        const isPasswordValid = user.verifyPassword(password);
+        const isPasswordValid = await user.verifyPassword(password);
         if (!isPasswordValid) {
           return validationError(res, 'Invalid Password');
         }
@@ -64,7 +63,9 @@ export const loginUser = async (req,res) =>{
             userId: user._id,
             token: verifytoken
           })
-          let verifylink = `${process.env.API_URL}/api/auth/verify?token=${verifytoken}`
+          let verifylink = `http://localhost:5000/api/auth/verify?token=${verifytoken}`
+
+        //   let verifylink = `${process.env.API_URL}/api/auth/verify?token=${verifytoken}`
           await sendMail(email,verifylink)
           return validationError(res, 'Please Verify Your Account!,Verification Mail Send To Your Email');
         }
