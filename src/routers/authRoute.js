@@ -9,13 +9,13 @@ const { Strategy: GoogleStrategy } = await import("passport-google-oauth20");
 
 const router = express.Router();
 
-router.use(
-    session({
-      secret: "demo@123",
-      resave: false,
-      saveUninitialized: true,
-    })
-  );
+// router.use(
+//     session({
+//       secret: "demo@123",
+//       resave: false,
+//       saveUninitialized: true,
+//     })
+//   );
 
 router.use(passport.initialize());
 router.use(passport.session());
@@ -25,7 +25,7 @@ passport.use(
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/auth/google/callback", // Must match Google Console
+        callbackURL: "http://localhost:5001/api/auth/google/callback", // Must match Google Console
       },
       (accessToken, refreshToken, profile, done) => {
         console.log("Access Token: ", accessToken);
@@ -45,7 +45,7 @@ passport.use(
   
   // Route to Start Authentication
   router.get(
-    "/auth/google",
+    "/google",
     passport.authenticate("google", { 
         scope: [
             "profile",
@@ -59,7 +59,7 @@ passport.use(
   
   // **OAuth Callback Route**
   router.get(
-    "/auth/google/callback",
+    "/google/callback",
     passport.authenticate("google", { failureRedirect: "/" }),
     (req, res) => {
       res.send("Login Successful!"); // Replace with your frontend redirect
