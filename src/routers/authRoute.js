@@ -9,13 +9,14 @@ const { Strategy: GoogleStrategy } = await import("passport-google-oauth20");
 
 const router = express.Router();
 
-// router.use(
-//     session({
-//       secret: "demo@123",
-//       resave: false,
-//       saveUninitialized: true,
-//     })
-//   );
+router.use(
+    session({
+      secret: 'your-secret-key',   // Set a secret key for signing session cookies
+      resave: false,               // Don't save session if unmodified
+      saveUninitialized: false,    // Don't store sessions that haven't been modified
+      cookie: { secure: false }    // Set `true` in production with HTTPS
+    })
+  );
 
 router.use(passport.initialize());
 router.use(passport.session());
