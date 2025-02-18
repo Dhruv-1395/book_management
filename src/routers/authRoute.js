@@ -26,7 +26,7 @@ passport.use(
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:5001/api/auth/google/callback", // Must match Google Console
+        callbackURL: "https://book-management-vgic.onrender.com/api/auth/google/callback", // Must match Google Console
       },
       (accessToken, refreshToken, profile, done) => {
         console.log("Access Token: ", accessToken);
